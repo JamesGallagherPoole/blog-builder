@@ -15,9 +15,13 @@ fn main() {
             println!("Input Path: {}", path.input);
             println!("Output Path: {}", path.output);
 
-            if let Some(content) = read_file(&path.input).ok() {
-                println!("Content: {}", markdown::to_html(&content));
+            if let Some(file_contents) = read_file(&path.input).ok() {
+                let html = markdown::to_html(&file_contents);
+                let html_file_name = create_new_file_name(&path.input).unwrap();
+                write_to_file(&path.output, &html_file_name, &html).expect("Unable to write file");
             }
+
+            create_directory(path.output.as_str()).expect("Unable to create directory");
         }
         Err(e) => {
             println!("Error: {}", e);
@@ -40,6 +44,27 @@ fn read_args() -> Result<Paths, Error> {
         };
         Ok(paths)
     }
+}
+
+fn create_directory(path: &str) -> Result<(), Error> {
+    let path = Path::new(path);
+    if !path.exists() {
+        fs::create_dir_all(path)?;
+    }
+    Ok(())
+}
+
+fn write_to_file(directory: &str, file_name: &str, contents: &str) -> Result<(), Error> {
+    let path = Path::new(directory).join(file_name);
+    fs::write(path, contents)?;
+    Ok(())
+}
+
+fn create_new_file_name(file_name: &str) -> Option<String> {
+    let path = Path::new(file_name);
+    let file_stem = path.file_stem()?;
+    let new_file_name = file_stem.to_string_lossy().into_owned() + ".html";
+    Some(new_file_name)
 }
 
 // Function to visit files in a directory
