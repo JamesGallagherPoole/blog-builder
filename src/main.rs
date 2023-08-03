@@ -9,6 +9,9 @@ fn main() {
     match read_args() {
         Ok(path) => {
             println!("Path: {}", path);
+            if let Some(content) = read_file(&path).ok() {
+                println!("Content: {}", markdown::to_html(&content));
+            }
         }
         Err(e) => {
             println!("Error: {}", e);
@@ -38,13 +41,13 @@ fn visit_files(dir: &Path, cb: &dyn Fn(&DirEntry)) -> Result<(), Error> {
             if path.is_dir() {
                 visit_files(&path, cb)?;
             } else {
-                cb(&entry);
+                if let Some(ext) = path.extension() {}
             }
         }
     }
     Ok(())
 }
 
-fn read_file(path: &str) -> Result<String, std::io::Error> {
+fn read_file(path: &str) -> Result<String, Error> {
     fs::read_to_string(path)
 }
