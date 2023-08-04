@@ -16,8 +16,10 @@ fn main() {
             println!("Output Path: {}", path.output);
 
             let input_path = Path::new(&path.input);
+            let output_path = Path::new(&path.output);
 
             if input_path.is_dir() {
+                build_images_folder(input_path, output_path);
                 /*
                 let html = markdown::to_html(&file_contents);
                 let html_file_name = create_new_file_name(&path.input).unwrap();
@@ -73,12 +75,55 @@ fn create_new_file_name(file_name: &str) -> Option<String> {
     Some(new_file_name)
 }
 
-fn get_header(input_path: &str) -> String {
+fn get_header(input_path: &str) -> Result<String, Error> {
     let header_path = input_path.to_string() + "/header.md";
-    let header_html = markdown::to_html(&read_file(&header_path).unwrap());
-    let wrapped_header = format!("<header>\n{}\n</header>", header_html);
-    println!("{}", wrapped_header);
-    wrapped_header
+    match read_file(header_path.as_str()) {
+        Ok(file_contents) => {
+            let header_html = markdown::to_html(&file_contents);
+            let wrapped_header = format!("<header>\n{}\n</header>", header_html);
+            Ok(wrapped_header)
+        }
+        Err(e) => {
+            println!("Error finding header file: {}", e);
+            Err(e)
+        }
+    }
+}
+
+fn build_images_folder(input_dir: &Path, output_dir: &Path) -> Result<(), Error> {
+    if input_dir.is_dir() {
+        // find a path within this directory called images/
+        for entry in fs::read_dir(input_dir)? {
+            let entry = entry?;
+            let path = entry.path();
+            if path.to_string_lossy().contains("images") {
+                if path.is_dir() {
+                    println!("Found images folder. Copying to destination...");
+                    let output_images_path = output_dir.join("images");
+                    copy_dir_to(&path, &output_images_path)?;
+                }
+            }
+        }
+    }
+    Ok(())
+}
+
+fn copy_dir_to(src_dir: &Path, dest_dir: &Path) -> Result<(), Error> {
+    if !dest_dir.exists() {
+        fs::create_dir_all(dest_dir)?;
+    }
+    for entry_result in fs::read_dir(src_dir)? {
+        let entry = entry_result?;
+        let file_type = entry.file_type()?;
+        if file_type.is_file() {
+            // Copy the file
+            fs::copy(entry.path(), dest_dir.join(entry.file_name()))?;
+        } else if file_type.is_dir() {
+            // Recursively copy the directory
+            copy_dir_to(&entry.path(), &dest_dir.join(entry.file_name()))?;
+        }
+    }
+    Ok(())
 }
 
 // Function to visit files in a directory
