@@ -20,6 +20,7 @@ fn main() {
 
             if input_path.is_dir() {
                 build_images_folder(input_path, output_path);
+                build_style_folder(input_path, output_path);
                 /*
                 let html = markdown::to_html(&file_contents);
                 let html_file_name = create_new_file_name(&path.input).unwrap();
@@ -117,6 +118,24 @@ fn build_images_folder(input_dir: &Path, output_dir: &Path) -> Result<(), Error>
                     println!("Found images folder. Copying to destination...");
                     let output_images_path = output_dir.join("images");
                     copy_dir_to(&path, &output_images_path)?;
+                }
+            }
+        }
+    }
+    Ok(())
+}
+
+fn build_style_folder(input_dir: &Path, output_dir: &Path) -> Result<(), Error> {
+    if input_dir.is_dir() {
+        // find a path within this directory called style/
+        for entry in fs::read_dir(input_dir)? {
+            let entry = entry?;
+            let path = entry.path();
+            if path.to_string_lossy().contains("style") {
+                if path.is_dir() {
+                    println!("Found style folder. Copying to destination...");
+                    let output_style_path = output_dir.join("style");
+                    copy_dir_to(&path, &output_style_path)?;
                 }
             }
         }
