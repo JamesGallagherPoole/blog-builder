@@ -1,6 +1,6 @@
 use std::{fs, io::Error, path::Path};
 
-pub fn read_file(path: &str) -> Result<String, Error> {
+pub fn read_file(path: &Path) -> Result<String, Error> {
     fs::read_to_string(path)
 }
 
@@ -22,7 +22,7 @@ pub fn copy_dir_to(src_dir: &Path, dest_dir: &Path) -> Result<(), Error> {
     Ok(())
 }
 
-pub fn write_to_file(directory: &str, file_name: &str, contents: &str) -> Result<(), Error> {
+pub fn write_to_file(directory: &Path, file_name: &str, contents: &str) -> Result<(), Error> {
     let path = Path::new(directory).join(file_name);
     fs::write(path, contents)?;
     Ok(())
