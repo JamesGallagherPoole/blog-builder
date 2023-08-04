@@ -4,7 +4,7 @@ mod templates;
 
 use std::{
     env,
-    fs::{self, DirEntry},
+    fs::{self},
     io::Error,
     path::Path,
 };
@@ -29,17 +29,18 @@ fn main() -> Result<(), Error> {
             create_directory(path.output.as_str()).expect("Unable to create directory");
 
             if input_path.is_dir() {
-                build_images_folder(input_path, output_path);
-                build_style_folder(input_path, output_path);
+                build_images_folder(input_path, output_path)?;
+                build_style_folder(input_path, output_path)?;
 
                 let header_block = get_header(&path.input)?;
                 let footer_block = get_footer(&path.input)?;
+
                 build_markdown_folder(
-                    input_path,
+                    &input_path,
                     "posts",
                     output_path,
-                    &footer_block,
                     &header_block,
+                    &footer_block,
                 )?;
             }
         }
@@ -113,48 +114,32 @@ fn build_style_folder(input_dir: &Path, output_dir: &Path) -> Result<(), Error> 
 
 fn build_markdown_folder(
     input_dir: &Path,
-    folder_name: &str,
+    folder_to_build: &str,
     output_dir: &Path,
-    footer: &String,
-    header: &String,
-) -> Result<(), Error> {
-    if input_dir.is_dir() {
-        // find a path within this directory called markdown/
-        for entry in fs::read_dir(input_dir)? {
-            let entry = entry?;
-            let path = entry.path();
-            if path.to_string_lossy().contains(folder_name) {
-                if path.is_dir() {
-                    println!("Found {} folder. Converting to HTML...", folder_name);
-                    let output_markdown_path = output_dir.join(folder_name);
-                    copy_dir_to(&path, &output_markdown_path)?;
-                }
-            }
-        }
-    }
-    Ok(())
-}
-
-// Function to visit files in a directory
-fn visit_files(
-    dir: &Path,
-    output_dir: &Path,
-    header: &String,
-    footer: &String,
-) -> Result<(), Error> {
-    if dir.is_dir() {
-        for entry in fs::read_dir(dir)? {
+    header: &str,
+    footer: &str,
+) -> Result<(), std::io::Error> {
+    let path_to_build = Path::new(input_dir).join(folder_to_build);
+    let output_dir = Path::new(output_dir).join(folder_to_build);
+    if path_to_build.is_dir() {
+        for entry in fs::read_dir(path_to_build)? {
             let entry = entry?;
             let path = entry.path();
             if path.is_dir() {
-                let new_output_dir = output_dir.join(path.file_name().unwrap());
-                visit_files(&path, &new_output_dir, &header, &footer)?;
+                let new_input_path = Path::new(input_dir).join(folder_to_build);
+                build_markdown_folder(
+                    &new_input_path,
+                    entry.file_name().to_str().unwrap(),
+                    &output_dir,
+                    header,
+                    footer,
+                )?;
             } else {
-                if let Some(file_contents) = read_file(&dir).ok() {
+                if let Some(file_contents) = read_file(&path).ok() {
                     let html = markdown::to_html(&file_contents);
                     let html_file_name = create_html_file_name(&path.to_str().unwrap()).unwrap();
-                    write_to_file(output_dir, &html_file_name, &html)
-                        .expect("Unable to write file");
+                    fs::create_dir_all(&output_dir)?;
+                    write_to_file(&output_dir, &html_file_name, &html)?;
                 }
             }
         }
