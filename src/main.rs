@@ -15,11 +15,17 @@ fn main() {
             println!("Input Path: {}", path.input);
             println!("Output Path: {}", path.output);
 
-            if let Some(file_contents) = read_file(&path.input).ok() {
+            let input_path = Path::new(&path.input);
+
+            if input_path.is_dir() {
+                /*
                 let html = markdown::to_html(&file_contents);
                 let html_file_name = create_new_file_name(&path.input).unwrap();
                 write_to_file(&path.output, &html_file_name, &html).expect("Unable to write file");
+                 */
+                let header_block = get_header(&path.input);
             }
+            if let Some(file_contents) = read_file(&path.input).ok() {}
 
             create_directory(path.output.as_str()).expect("Unable to create directory");
         }
@@ -65,6 +71,14 @@ fn create_new_file_name(file_name: &str) -> Option<String> {
     let file_stem = path.file_stem()?;
     let new_file_name = file_stem.to_string_lossy().into_owned() + ".html";
     Some(new_file_name)
+}
+
+fn get_header(input_path: &str) -> String {
+    let header_path = input_path.to_string() + "/header.md";
+    let header_html = markdown::to_html(&read_file(&header_path).unwrap());
+    let wrapped_header = format!("<header>\n{}\n</header>", header_html);
+    println!("{}", wrapped_header);
+    wrapped_header
 }
 
 // Function to visit files in a directory
