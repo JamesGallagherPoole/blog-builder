@@ -137,9 +137,17 @@ fn build_markdown_folder(
             } else {
                 if let Some(file_contents) = read_file(&path).ok() {
                     let html = markdown::to_html(&file_contents);
+                    let html_combined = format!("{}{}{}", header, html, footer);
+                    let html_wrapped = format!("<div id=\"container\">{}</div>", html_combined);
+                    let html_with_head = format!(
+                        "<head>
+                        <viewport content=\"width=device-width, initial-scale=1.0\">\n
+                        <link rel=\"stylesheet\" href=\"../style/style.css\"></head>{}",
+                        html_wrapped
+                    );
                     let html_file_name = create_html_file_name(&path.to_str().unwrap()).unwrap();
                     fs::create_dir_all(&output_dir)?;
-                    write_to_file(&output_dir, &html_file_name, &html)?;
+                    write_to_file(&output_dir, &html_file_name, &html_with_head)?;
                 }
             }
         }
