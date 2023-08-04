@@ -26,6 +26,7 @@ fn main() {
                 write_to_file(&path.output, &html_file_name, &html).expect("Unable to write file");
                  */
                 let header_block = get_header(&path.input);
+                let footer_block = get_footer(&path.input);
             }
             if let Some(file_contents) = read_file(&path.input).ok() {}
 
@@ -85,6 +86,21 @@ fn get_header(input_path: &str) -> Result<String, Error> {
         }
         Err(e) => {
             println!("Error finding header file: {}", e);
+            Err(e)
+        }
+    }
+}
+
+fn get_footer(input_path: &str) -> Result<String, Error> {
+    let footer_path = input_path.to_string() + "/footer.md";
+    match read_file(footer_path.as_str()) {
+        Ok(file_contents) => {
+            let footer_html = markdown::to_html(&file_contents);
+            let wrapped_footer = format!("<footer>\n{}\n</footer>", footer_html);
+            Ok(wrapped_footer)
+        }
+        Err(e) => {
+            println!("Error finding footer file: {}", e);
             Err(e)
         }
     }
