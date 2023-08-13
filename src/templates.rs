@@ -31,3 +31,32 @@ pub fn get_footer(input_path: &str) -> Result<String, Error> {
         }
     }
 }
+
+pub fn get_index(input_path: &Path) -> Result<String, Error> {
+    let index_path = input_path.to_str().unwrap().to_string() + "/index.html";
+    match read_file(Path::new(index_path.as_str())) {
+        Ok(file_contents) => Ok(file_contents),
+        Err(e) => {
+            println!("Error finding index file: {}", e);
+            Err(e)
+        }
+    }
+}
+
+pub fn wrap_in_header_and_footer(
+    content_block: &str,
+    header_block: &str,
+    footer_block: &str,
+) -> Result<String, Error> {
+    let wrapped_content = format!("{}{}{}", header_block, content_block, footer_block);
+    let wrapped_in_container = format!("\n<div id=\"container\">{}</div>", wrapped_content);
+    Ok(wrapped_in_container)
+}
+
+pub fn add_head(content_block: &str) -> Result<String, Error> {
+    let html_with_head = format!(
+        "\n<head>\n<viewport content=\"width=device-width, initial-scale=1.0\">\n<link rel=\"stylesheet\" href=\"./style/style.css\">\n</head>\n{}",
+        content_block
+    );
+    Ok(html_with_head)
+}

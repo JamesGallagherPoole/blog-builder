@@ -14,7 +14,7 @@ use paths::Paths;
 
 use crate::{
     files::{copy_dir_to, read_file},
-    templates::{get_footer, get_header},
+    templates::{add_head, get_footer, get_header, get_index, wrap_in_header_and_footer},
 };
 
 fn main() -> Result<(), Error> {
@@ -42,6 +42,8 @@ fn main() -> Result<(), Error> {
                     &header_block,
                     &footer_block,
                 )?;
+
+                build_main_page(input_path, output_path, &header_block, &footer_block)?;
             }
         }
         Err(e) => {
@@ -54,7 +56,7 @@ fn main() -> Result<(), Error> {
 fn read_args() -> Result<Paths, Error> {
     let args: Vec<String> = env::args().collect();
 
-    if args.len() > 3 {
+    if args.len() > 3 || args.len() <= 1 {
         Err(Error::new(
             std::io::ErrorKind::InvalidInput,
             "Provide a single path argument",
@@ -137,17 +139,37 @@ fn build_markdown_folder(
             } else {
                 if let Some(file_contents) = read_file(&path).ok() {
                     let html = markdown::to_html(&file_contents);
-                    let html_combined = format!("{}{}{}", header, html, footer);
-                    let html_wrapped = format!("<div id=\"container\">{}</div>", html_combined);
-                    let html_with_head = format!(
-                        "<head>
-                        <viewport content=\"width=device-width, initial-scale=1.0\">\n
-                        <link rel=\"stylesheet\" href=\"../style/style.css\"></head>{}",
-                        html_wrapped
-                    );
+                    let wrapped_html = wrap_in_header_and_footer(&html, header, footer)?;
+                    let wrapped_html_with_head = add_head(&wrapped_html)?;
                     let html_file_name = create_html_file_name(&path.to_str().unwrap()).unwrap();
                     fs::create_dir_all(&output_dir)?;
-                    write_to_file(&output_dir, &html_file_name, &html_with_head)?;
+                    println!("Writing {} to {}", html_file_name, output_dir.display());
+                    write_to_file(&output_dir, &html_file_name, &wrapped_html_with_head)?;
+                }
+            }
+        }
+    }
+    Ok(())
+}
+
+fn build_main_page(
+    input_dir: &Path,
+    output_dir: &Path,
+    header: &str,
+    footer: &str,
+) -> Result<(), Error> {
+    if input_dir.is_dir() {
+        // find a path within this directory called index.md
+        for entry in fs::read_dir(input_dir)? {
+            let entry = entry?;
+            let path = entry.path();
+            if path.to_string_lossy().contains("index.html") {
+                if path.is_file() {
+                    println!("Found main template. Building and copying to destination...");
+                    let index_content = get_index(input_dir)?;
+                    let wrapped_index = wrap_in_header_and_footer(&index_content, header, footer)?;
+                    let wrapped_index_with_head = add_head(&wrapped_index)?;
+                    write_to_file(output_dir, "index.html", &wrapped_index_with_head)?;
                 }
             }
         }
