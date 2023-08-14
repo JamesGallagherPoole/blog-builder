@@ -1,5 +1,6 @@
 mod files;
 mod paths;
+mod posts;
 mod templates;
 
 use std::{
@@ -14,6 +15,7 @@ use paths::Paths;
 
 use crate::{
     files::{copy_dir_to, read_file},
+    posts::Post,
     templates::{add_head, get_footer, get_header, get_index, wrap_in_header_and_footer},
 };
 
@@ -35,7 +37,7 @@ fn main() -> Result<(), Error> {
                 let header_block = get_header(&path.input)?;
                 let footer_block = get_footer(&path.input)?;
 
-                build_markdown_folder(
+                let posts = build_content_folder(
                     &input_path,
                     "posts",
                     output_path,
@@ -114,28 +116,31 @@ fn build_style_folder(input_dir: &Path, output_dir: &Path) -> Result<(), Error> 
     Ok(())
 }
 
-fn build_markdown_folder(
+fn build_content_folder(
     input_dir: &Path,
     folder_to_build: &str,
     output_dir: &Path,
     header: &str,
     footer: &str,
-) -> Result<(), std::io::Error> {
+) -> Result<Vec<Post>, std::io::Error> {
+    let mut posts: Vec<Post> = Vec::new();
+
     let path_to_build = Path::new(input_dir).join(folder_to_build);
-    let output_dir = Path::new(output_dir).join(folder_to_build);
+    let output_dir = Path::new(output_dir).join(&folder_to_build);
     if path_to_build.is_dir() {
-        for entry in fs::read_dir(path_to_build)? {
+        for entry in fs::read_dir(&path_to_build)? {
             let entry = entry?;
             let path = entry.path();
             if path.is_dir() {
-                let new_input_path = Path::new(input_dir).join(folder_to_build);
-                build_markdown_folder(
+                let new_input_path = Path::new(input_dir).join(&folder_to_build);
+                let mut child_posts = build_content_folder(
                     &new_input_path,
                     entry.file_name().to_str().unwrap(),
                     &output_dir,
                     header,
                     footer,
                 )?;
+                posts.append(&mut child_posts);
             } else {
                 if let Some(file_contents) = read_file(&path).ok() {
                     let html = markdown::to_html(&file_contents);
@@ -143,13 +148,24 @@ fn build_markdown_folder(
                     let wrapped_html_with_head = add_head(&wrapped_html)?;
                     let html_file_name = create_html_file_name(&path.to_str().unwrap()).unwrap();
                     fs::create_dir_all(&output_dir)?;
-                    println!("Writing {} to {}", html_file_name, output_dir.display());
+                    println!("Writing {} to {}", html_file_name, &output_dir.display());
                     write_to_file(&output_dir, &html_file_name, &wrapped_html_with_head)?;
+
+                    let link_path = format!("./{}/{}", &output_dir.display(), html_file_name);
+
+                    let post = Post {
+                        title: html_file_name,
+                        date: String::from(""),
+                        content: wrapped_html_with_head,
+                        path: link_path,
+                    };
+
+                    posts.push(post);
                 }
             }
         }
     }
-    Ok(())
+    Ok(posts)
 }
 
 fn build_main_page(
