@@ -16,7 +16,10 @@ use paths::Paths;
 use crate::{
     files::{copy_dir_to, read_file},
     posts::Post,
-    templates::{add_head, get_footer, get_header, get_index, wrap_in_header_and_footer},
+    templates::{
+        add_head, add_recent_posts, get_footer, get_header, get_index_template,
+        wrap_in_header_and_footer,
+    },
 };
 
 fn main() -> Result<(), Error> {
@@ -45,7 +48,13 @@ fn main() -> Result<(), Error> {
                     &footer_block,
                 )?;
 
-                build_main_page(input_path, output_path, &header_block, &footer_block)?;
+                build_main_page(
+                    input_path,
+                    output_path,
+                    &posts,
+                    &header_block,
+                    &footer_block,
+                )?;
             }
         }
         Err(e) => {
@@ -171,6 +180,7 @@ fn build_content_folder(
 fn build_main_page(
     input_dir: &Path,
     output_dir: &Path,
+    posts: &Vec<Post>,
     header: &str,
     footer: &str,
 ) -> Result<(), Error> {
@@ -182,7 +192,8 @@ fn build_main_page(
             if path.to_string_lossy().contains("index.html") {
                 if path.is_file() {
                     println!("Found main template. Building and copying to destination...");
-                    let index_content = get_index(input_dir)?;
+                    let index_template = get_index_template(input_dir)?;
+                    let index_content = add_recent_posts(&index_template, &posts, 5);
                     let wrapped_index = wrap_in_header_and_footer(&index_content, header, footer)?;
                     let wrapped_index_with_head = add_head(&wrapped_index)?;
                     write_to_file(output_dir, "index.html", &wrapped_index_with_head)?;

@@ -34,3 +34,22 @@ pub fn create_html_file_name(file_name: &str) -> Option<String> {
     let new_file_name = file_stem.to_string_lossy().into_owned() + ".html";
     Some(new_file_name)
 }
+
+pub fn get_date_from_path(path: &str) -> Option<String> {
+    let path = Path::new(path);
+    let file_stem = path.file_stem()?;
+    let file_stem = file_stem.to_string_lossy();
+    let date = file_stem.split('-').collect::<Vec<&str>>();
+    let date = date[0..3].join("-");
+    Some(date)
+}
+
+pub fn remove_until_first_slash(path: &str) -> &str {
+    // Find the first occurrence of the '/' character
+    match path.find('/') {
+        // If found, return the substring after the '/'
+        Some(pos) => &path[pos + 1..],
+        // If not found, return the original string
+        None => path,
+    }
+}

@@ -1,6 +1,9 @@
 use std::{io::Error, path::Path};
 
-use crate::files::read_file;
+use crate::{
+    files::read_file,
+    posts::{create_recent_posts_html, Post},
+};
 
 pub fn get_header(input_path: &str) -> Result<String, Error> {
     let header_path = input_path.to_string() + "/header.md";
@@ -32,7 +35,7 @@ pub fn get_footer(input_path: &str) -> Result<String, Error> {
     }
 }
 
-pub fn get_index(input_path: &Path) -> Result<String, Error> {
+pub fn get_index_template(input_path: &Path) -> Result<String, Error> {
     let index_path = input_path.to_str().unwrap().to_string() + "/index.html";
     match read_file(Path::new(index_path.as_str())) {
         Ok(file_contents) => Ok(file_contents),
@@ -41,6 +44,13 @@ pub fn get_index(input_path: &Path) -> Result<String, Error> {
             Err(e)
         }
     }
+}
+
+pub fn add_recent_posts(index_template: &str, posts: &Vec<Post>, num_posts: usize) -> String {
+    let recent_posts_html = create_recent_posts_html(&posts, num_posts);
+
+    let index_template = format!("{}\n{}", index_template, recent_posts_html);
+    index_template
 }
 
 pub fn wrap_in_header_and_footer(
