@@ -14,7 +14,7 @@ use files::{create_html_file_name, write_to_file};
 use paths::Paths;
 
 use crate::{
-    files::{copy_dir_to, read_file},
+    files::{copy_dir_to, read_file, remove_until_first_slash},
     posts::Post,
     templates::{
         add_head, add_recent_posts, get_footer, get_header, get_index_template,
@@ -160,7 +160,11 @@ fn build_content_folder(
                     println!("Writing {} to {}", html_file_name, &output_dir.display());
                     write_to_file(&output_dir, &html_file_name, &wrapped_html_with_head)?;
 
-                    let link_path = format!("./{}/{}", &output_dir.display(), html_file_name);
+                    let link_path = format!(
+                        "./{}/{}",
+                        remove_until_first_slash(&output_dir.display().to_string()),
+                        html_file_name
+                    );
 
                     let post = Post {
                         title: html_file_name,
