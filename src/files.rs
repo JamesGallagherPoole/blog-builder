@@ -35,6 +35,15 @@ pub fn create_html_file_name(file_name: &str) -> Option<String> {
     Some(new_file_name)
 }
 
+pub fn prepend_go_up_folder_to_path(path: &str, num: i8) -> String {
+    let mut new_path = String::new();
+    for _ in 0..num {
+        new_path.push_str("../");
+    }
+    new_path.push_str(path);
+    new_path
+}
+
 pub fn get_date_from_path(path: &str) -> Option<String> {
     let path = Path::new(path);
     let file_stem = path.file_stem()?;

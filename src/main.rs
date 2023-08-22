@@ -16,10 +16,7 @@ use paths::Paths;
 use crate::{
     files::{copy_dir_to, read_file, remove_until_first_slash},
     posts::Post,
-    templates::{
-        add_head, add_recent_posts, get_footer, get_header, get_index_template,
-        wrap_in_header_and_footer,
-    },
+    templates::{add_head, add_recent_posts, get_index_template, wrap_in_header_and_footer},
 };
 
 fn main() -> Result<(), Error> {
@@ -37,24 +34,9 @@ fn main() -> Result<(), Error> {
                 build_images_folder(input_path, output_path)?;
                 build_style_folder(input_path, output_path)?;
 
-                let header_block = get_header(&path.input)?;
-                let footer_block = get_footer(&path.input)?;
+                let posts = build_content_folder(&input_path, "posts", output_path)?;
 
-                let posts = build_content_folder(
-                    &input_path,
-                    "posts",
-                    output_path,
-                    &header_block,
-                    &footer_block,
-                )?;
-
-                build_main_page(
-                    input_path,
-                    output_path,
-                    &posts,
-                    &header_block,
-                    &footer_block,
-                )?;
+                build_main_page(input_path, output_path, &posts)?;
             }
         }
         Err(e) => {
@@ -129,8 +111,6 @@ fn build_content_folder(
     input_dir: &Path,
     folder_to_build: &str,
     output_dir: &Path,
-    header: &str,
-    footer: &str,
 ) -> Result<Vec<Post>, std::io::Error> {
     let mut posts: Vec<Post> = Vec::new();
 
@@ -140,54 +120,37 @@ fn build_content_folder(
         for entry in fs::read_dir(&path_to_build)? {
             let entry = entry?;
             let path = entry.path();
-            if path.is_dir() {
-                let new_input_path = Path::new(input_dir).join(&folder_to_build);
-                let mut child_posts = build_content_folder(
-                    &new_input_path,
-                    entry.file_name().to_str().unwrap(),
-                    &output_dir,
-                    header,
-                    footer,
-                )?;
-                posts.append(&mut child_posts);
-            } else {
-                if let Some(file_contents) = read_file(&path).ok() {
-                    let html = markdown::to_html(&file_contents);
-                    let wrapped_html = wrap_in_header_and_footer(&html, header, footer)?;
-                    let wrapped_html_with_head = add_head(&wrapped_html)?;
-                    let html_file_name = create_html_file_name(&path.to_str().unwrap()).unwrap();
-                    fs::create_dir_all(&output_dir)?;
-                    println!("Writing {} to {}", html_file_name, &output_dir.display());
-                    write_to_file(&output_dir, &html_file_name, &wrapped_html_with_head)?;
 
-                    let link_path = format!(
-                        "./{}/{}",
-                        remove_until_first_slash(&output_dir.display().to_string()),
-                        html_file_name
-                    );
+            if let Some(file_contents) = read_file(&path).ok() {
+                let html = markdown::to_html(&file_contents);
+                let wrapped_html = wrap_in_header_and_footer(&input_dir, &html, 1)?;
+                let wrapped_html_with_head = add_head(&wrapped_html, true)?;
+                let html_file_name = create_html_file_name(&path.to_str().unwrap()).unwrap();
+                fs::create_dir_all(&output_dir)?;
+                println!("Writing {} to {}", html_file_name, &output_dir.display());
+                write_to_file(&output_dir, &html_file_name, &wrapped_html_with_head)?;
 
-                    let post = Post {
-                        title: html_file_name,
-                        date: String::from(""),
-                        content: wrapped_html_with_head,
-                        path: link_path,
-                    };
+                let link_path = format!(
+                    "./{}/{}",
+                    remove_until_first_slash(&output_dir.display().to_string()),
+                    html_file_name
+                );
 
-                    posts.push(post);
-                }
+                let post = Post {
+                    title: html_file_name,
+                    date: String::from(""),
+                    content: wrapped_html_with_head,
+                    path: link_path,
+                };
+
+                posts.push(post);
             }
         }
     }
     Ok(posts)
 }
 
-fn build_main_page(
-    input_dir: &Path,
-    output_dir: &Path,
-    posts: &Vec<Post>,
-    header: &str,
-    footer: &str,
-) -> Result<(), Error> {
+fn build_main_page(input_dir: &Path, output_dir: &Path, posts: &Vec<Post>) -> Result<(), Error> {
     if input_dir.is_dir() {
         // find a path within this directory called index.md
         for entry in fs::read_dir(input_dir)? {
@@ -198,8 +161,8 @@ fn build_main_page(
                     println!("Found main template. Building and copying to destination...");
                     let index_template = get_index_template(input_dir)?;
                     let index_content = add_recent_posts(&index_template, &posts, 5);
-                    let wrapped_index = wrap_in_header_and_footer(&index_content, header, footer)?;
-                    let wrapped_index_with_head = add_head(&wrapped_index)?;
+                    let wrapped_index = wrap_in_header_and_footer(&input_dir, &index_content, 0)?;
+                    let wrapped_index_with_head = add_head(&wrapped_index, false)?;
                     write_to_file(output_dir, "index.html", &wrapped_index_with_head)?;
                 }
             }
