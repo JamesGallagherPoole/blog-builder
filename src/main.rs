@@ -1,4 +1,5 @@
 mod files;
+mod metadata;
 mod paths;
 mod posts;
 mod templates;
@@ -15,6 +16,7 @@ use paths::Paths;
 
 use crate::{
     files::{copy_dir_to, read_file, remove_until_first_slash},
+    metadata::MetaData,
     posts::Post,
     templates::{add_head, add_recent_posts, get_index_template, wrap_in_header_and_footer},
 };
@@ -37,6 +39,8 @@ fn main() -> Result<(), Error> {
                 let posts = build_content_folder(&input_path, "posts", output_path)?;
 
                 build_main_page(input_path, output_path, &posts)?;
+
+                build_all_posts_page(input_path, output_path, &posts)?;
             }
         }
         Err(e) => {
@@ -122,6 +126,9 @@ fn build_content_folder(
             let path = entry.path();
 
             if let Some(file_contents) = read_file(&path).ok() {
+                let (file_metadata, file_contents) =
+                    MetaData::read_metadata_and_contents(&file_contents);
+
                 let html = markdown::to_html(&file_contents);
                 let wrapped_html = wrap_in_header_and_footer(&input_dir, &html, 1)?;
                 let wrapped_html_with_head = add_head(&wrapped_html, true)?;
@@ -137,8 +144,7 @@ fn build_content_folder(
                 );
 
                 let post = Post {
-                    title: html_file_name,
-                    date: String::from(""),
+                    metadata: file_metadata,
                     content: wrapped_html_with_head,
                     path: link_path,
                 };
@@ -167,6 +173,20 @@ fn build_main_page(input_dir: &Path, output_dir: &Path, posts: &Vec<Post>) -> Re
                 }
             }
         }
+    }
+    Ok(())
+}
+
+fn build_all_posts_page(
+    input_dir: &Path,
+    output_dir: &Path,
+    posts: &Vec<Post>,
+) -> Result<(), Error> {
+    if input_dir.is_dir() {
+        let index_content = add_recent_posts("", &posts, 5);
+        let wrapped_index = wrap_in_header_and_footer(&input_dir, &index_content, 0)?;
+        let wrapped_index_with_head = add_head(&wrapped_index, false)?;
+        write_to_file(output_dir, "all.html", &wrapped_index_with_head)?;
     }
     Ok(())
 }

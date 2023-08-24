@@ -3,6 +3,21 @@
 version = 3
 
 [[package]]
+name = "frontmatter"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8fc799a66fc39c6d56fa3bdc8afc1fd7efa8ebff71f4ff091596faffb96c84fa"
+dependencies = [
+ "yaml-rust",
+]
+
+[[package]]
+name = "linked-hash-map"
+version = "0.5.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0717cef1bc8b636c6e1c1bbdefc09e6322da8a9321966e8928ef80d20f7f770f"
+
+[[package]]
 name = "markdown"
 version = "1.0.0-alpha.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -15,7 +30,9 @@ dependencies = [
 name = "markdown-web-tool"
 version = "0.1.0"
 dependencies = [
+ "frontmatter",
  "markdown",
+ "yaml-rust",
 ]
 
 [[package]]
@@ -23,3 +40,12 @@ name = "unicode-id"
 version = "0.3.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d70b6494226b36008c8366c288d77190b3fad2eb4c10533139c1c1f461127f1a"
+
+[[package]]
+name = "yaml-rust"
+version = "0.4.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "56c1936c4cc7a1c9ab21a1ebb602eb942ba868cbd44a99cb7cdc5892335e1c85"
+dependencies = [
+ "linked-hash-map",
+]

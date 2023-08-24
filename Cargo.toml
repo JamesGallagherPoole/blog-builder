@@ -7,3 +7,5 @@ edition = "2021"
 
 [dependencies]
 markdown = "1.0.0-alpha.11"
+frontmatter = "0.4.0"
+yaml-rust = "0.4"
