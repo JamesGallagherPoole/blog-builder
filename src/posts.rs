@@ -16,6 +16,7 @@ pub fn create_recent_posts_html(posts: &Vec<Post>, num_posts: usize) -> String {
         );
         recent_posts_html.push_str(&post_html);
     }
+    recent_posts_html.push_str("<a href=\"./all.html\">» all posts</a>");
     recent_posts_html.push_str("</ul>\n</div>\n");
     recent_posts_html
 }
