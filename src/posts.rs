@@ -1,5 +1,6 @@
 use crate::metadata::MetaData;
 
+#[derive(Debug, Clone)]
 pub struct Post {
     pub metadata: MetaData,
     pub content: String,

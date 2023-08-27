@@ -1,3 +1,4 @@
+mod category;
 mod files;
 mod metadata;
 mod paths;
@@ -11,10 +12,12 @@ use std::{
     path::Path,
 };
 
+use category::{create_category_list_html, Category};
 use files::{create_html_file_name, write_to_file};
 use paths::Paths;
 
 use crate::{
+    category::get_category_path,
     files::{copy_dir_to, read_file, remove_until_first_slash},
     metadata::MetaData,
     posts::Post,
@@ -36,11 +39,15 @@ fn main() -> Result<(), Error> {
                 build_images_folder(input_path, output_path)?;
                 build_style_folder(input_path, output_path)?;
 
-                let posts = build_content_folder(&input_path, "posts", output_path)?;
+                let (posts, categories) = build_content_folder(&input_path, "posts", output_path)?;
 
                 build_main_page(input_path, output_path, &posts)?;
 
                 build_all_posts_page(input_path, output_path, &posts)?;
+
+                build_categories_index_page(input_path, output_path, &categories)?;
+
+                build_category_pages(input_path, output_path, &categories)?;
             }
         }
         Err(e) => {
@@ -115,8 +122,9 @@ fn build_content_folder(
     input_dir: &Path,
     folder_to_build: &str,
     output_dir: &Path,
-) -> Result<Vec<Post>, std::io::Error> {
+) -> Result<(Vec<Post>, Vec<(Category, Vec<Post>)>), std::io::Error> {
     let mut posts: Vec<Post> = Vec::new();
+    let mut categories: Vec<(Category, Vec<Post>)> = Vec::new();
 
     let path_to_build = Path::new(input_dir).join(folder_to_build);
     let output_dir = Path::new(output_dir).join(&folder_to_build);
@@ -144,16 +152,37 @@ fn build_content_folder(
                 );
 
                 let post = Post {
-                    metadata: file_metadata,
+                    metadata: file_metadata.clone(),
                     content: wrapped_html_with_head,
                     path: link_path,
                 };
 
-                posts.push(post);
+                posts.push(post.clone());
+
+                // Process Categories
+                for category in &file_metadata.categories {
+                    let category_path = get_category_path(&category);
+                    let category = Category {
+                        name: category.clone(),
+                        path: category_path.clone(),
+                    };
+
+                    let mut found = false;
+                    for (cat, posts) in &mut categories {
+                        if cat.name == category.name {
+                            found = true;
+                            posts.push(post.clone());
+                        }
+                    }
+                    if !found {
+                        categories.push((category, vec![post.clone()]));
+                    }
+                }
             }
         }
     }
-    Ok(posts)
+
+    Ok((posts, categories))
 }
 
 fn build_main_page(input_dir: &Path, output_dir: &Path, posts: &Vec<Post>) -> Result<(), Error> {
@@ -187,6 +216,41 @@ fn build_all_posts_page(
         let wrapped_index = wrap_in_header_and_footer(&input_dir, &index_content, 0)?;
         let wrapped_index_with_head = add_head(&wrapped_index, false)?;
         write_to_file(output_dir, "all.html", &wrapped_index_with_head)?;
+    }
+    Ok(())
+}
+
+fn build_categories_index_page(
+    input_dir: &Path,
+    output_dir: &Path,
+    categories: &Vec<(Category, Vec<Post>)>,
+) -> Result<(), Error> {
+    if input_dir.is_dir() {
+        let mut content = String::from("<h2>Categories</h2>\n<ul>\n");
+
+        for (category, posts) in categories {
+            let category_list = create_category_list_html(category, posts);
+            content.push_str(&category_list);
+        }
+        let wrapped_index = wrap_in_header_and_footer(&input_dir, &content, 0)?;
+        let wrapped_index_with_head = add_head(&wrapped_index, false)?;
+        write_to_file(output_dir, "categories.html", &wrapped_index_with_head)?;
+    }
+    Ok(())
+}
+
+fn build_category_pages(
+    input_dir: &Path,
+    output_dir: &Path,
+    categories: &Vec<(Category, Vec<Post>)>,
+) -> Result<(), Error> {
+    if input_dir.is_dir() {
+        for (category, posts) in categories {
+            let content = &create_category_list_html(category, posts);
+            let wrapped_index = wrap_in_header_and_footer(&input_dir, &content, 0)?;
+            let wrapped_index_with_head = add_head(&wrapped_index, false)?;
+            write_to_file(output_dir, &category.path, &wrapped_index_with_head)?;
+        }
     }
     Ok(())
 }
