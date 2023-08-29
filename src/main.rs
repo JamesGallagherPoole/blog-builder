@@ -15,6 +15,7 @@ use std::{
 use category::{create_category_list_html, Category};
 use files::{create_html_file_name, write_to_file};
 use paths::Paths;
+use templates::group_by_year_as_html;
 
 use crate::{
     category::get_category_path,
@@ -212,8 +213,8 @@ fn build_all_posts_page(
     posts: &Vec<Post>,
 ) -> Result<(), Error> {
     if input_dir.is_dir() {
-        let index_content = add_recent_posts("", &posts, 5);
-        let wrapped_index = wrap_in_header_and_footer(&input_dir, &index_content, 0)?;
+        let content = group_by_year_as_html(&posts);
+        let wrapped_index = wrap_in_header_and_footer(&input_dir, &content, 0)?;
         let wrapped_index_with_head = add_head(&wrapped_index, false)?;
         write_to_file(output_dir, "all.html", &wrapped_index_with_head)?;
     }

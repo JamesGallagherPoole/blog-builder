@@ -1,5 +1,7 @@
 use std::{io::Error, path::Path};
 
+use chrono::Datelike;
+
 use crate::{
     files::{prepend_go_up_folder_to_path, read_file},
     posts::{create_recent_posts_html, Post},
@@ -106,4 +108,41 @@ pub fn add_head(content_block: &str, look_up: bool) -> Result<String, Error> {
         content_block
     );
     Ok(html_with_head)
+}
+
+pub fn group_by_year_as_html(posts: &Vec<Post>) -> String {
+    let mut sorted_posts: Vec<(i32, Vec<Post>)> = Vec::new();
+    for post in posts {
+        let year = post.metadata.date.year();
+        let mut found = false;
+        for (i, sorted_post) in sorted_posts.iter_mut().enumerate() {
+            if sorted_post.0 == year {
+                sorted_post.1.push(post.clone());
+                found = true;
+                break;
+            }
+        }
+        if !found {
+            sorted_posts.push((year, vec![post.clone()]));
+        }
+    }
+    // Sort by most recent year first
+    sorted_posts.sort_by(|a, b| b.0.cmp(&a.0));
+
+    let mut all_posts_html = String::new();
+    for (year, posts) in sorted_posts {
+        let mut year_html = format!("<h2>{}</h2>\n<ul>\n", year);
+        for post in posts {
+            year_html.push_str(
+                format!(
+                    "<li><a href=\"{}\">{}</a></li>\n",
+                    post.path, post.metadata.title
+                )
+                .as_str(),
+            );
+        }
+        all_posts_html.push_str(&year_html);
+        all_posts_html.push_str("</ul>\n");
+    }
+    all_posts_html
 }

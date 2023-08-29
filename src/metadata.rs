@@ -1,7 +1,9 @@
+use chrono::NaiveDate;
+
 #[derive(Debug, Clone)]
 pub struct MetaData {
     pub title: String,
-    pub date: String,
+    pub date: NaiveDate,
     pub categories: Vec<String>,
 }
 
@@ -15,7 +17,7 @@ impl MetaData {
 
         let mut metadata = MetaData {
             title: String::from(""),
-            date: String::from(""),
+            date: NaiveDate::from_ymd_opt(1970, 1, 1).unwrap(),
             categories: Vec::new(),
         };
 
@@ -25,7 +27,8 @@ impl MetaData {
                     metadata.title = title.as_str().unwrap().to_string();
                 }
                 if let Some(date) = yaml.get(&yaml_rust::Yaml::from_str("date")) {
-                    metadata.date = date.as_str().unwrap().to_string();
+                    metadata.date =
+                        NaiveDate::parse_from_str(date.as_str().unwrap(), "%Y-%m-%d").unwrap();
                 }
                 if let Some(categories) = yaml.get(&yaml_rust::Yaml::from_str("categories")) {
                     if let Some(categories) = categories.as_vec() {
