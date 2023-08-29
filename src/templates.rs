@@ -132,6 +132,10 @@ pub fn group_by_year_as_html(posts: &Vec<Post>) -> String {
     let mut all_posts_html = String::new();
     for (year, posts) in sorted_posts {
         let mut year_html = format!("<h2>{}</h2>\n<ul>\n", year);
+        // Sort by most recent post first
+        let mut posts = posts;
+        posts.sort_by(|a, b| b.metadata.date.cmp(&a.metadata.date));
+
         for post in posts {
             year_html.push_str(
                 format!(
