@@ -156,10 +156,16 @@ fn build_content_folder(
                     html_file_name
                 );
 
+                let public_link = format!(
+                    "https://james.poole.ie/{}",
+                    remove_until_first_slash(&link_path)
+                );
+
                 let post = Post {
                     metadata: file_metadata.clone(),
                     content: wrapped_html_with_head,
                     path: link_path,
+                    public_link: public_link,
                 };
 
                 posts.push(post.clone());

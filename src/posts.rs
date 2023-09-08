@@ -5,6 +5,7 @@ pub struct Post {
     pub metadata: MetaData,
     pub content: String,
     pub path: String,
+    pub public_link: String,
 }
 
 pub fn create_recent_posts_html(posts: &Vec<Post>, num_posts: usize) -> String {

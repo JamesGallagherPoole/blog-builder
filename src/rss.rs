@@ -1,6 +1,6 @@
 extern crate rss;
 
-use rss::{ChannelBuilder, ItemBuilder};
+use rss::{ChannelBuilder, Guid, ItemBuilder};
 use std::path::Path;
 
 use crate::files::write_to_file;
@@ -10,10 +10,14 @@ pub fn build_rss_feed(output_dir: &Path, posts: Vec<Post>) {
     let mut items = Vec::new();
     for post in posts {
         let item = ItemBuilder::default()
-            .title(Some(post.metadata.title))
-            .link(Some(post.path))
-            .description(Some(post.metadata.summary))
-            .pub_date(Some(post.metadata.date.to_string()))
+            .title(Some(post.metadata.title.clone()))
+            .link(Some(post.public_link.clone()))
+            .description(Some(post.metadata.summary.clone()))
+            .pub_date(Some(post.metadata.rss_formatted_date()))
+            .guid(Some(Guid {
+                value: post.public_link.clone(),
+                ..Default::default()
+            }))
             .build()
             .unwrap();
         items.push(item);

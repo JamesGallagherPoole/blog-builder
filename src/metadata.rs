@@ -1,4 +1,4 @@
-use chrono::NaiveDate;
+use chrono::{NaiveDate, NaiveDateTime};
 
 #[derive(Debug, Clone)]
 pub struct MetaData {
@@ -45,5 +45,14 @@ impl MetaData {
         }
 
         (metadata, content)
+    }
+
+    pub fn rss_formatted_date(&self) -> String {
+        // Assuming time as 00:00:00
+        let datetime =
+            NaiveDateTime::new(self.date, chrono::NaiveTime::from_hms_opt(0, 0, 0).unwrap());
+
+        // Format to RFC 822 style
+        datetime.format("%a, %d %b %Y %H:%M:%S GMT").to_string()
     }
 }
