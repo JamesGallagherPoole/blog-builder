@@ -3,10 +3,11 @@ extern crate rss;
 use rss::{ChannelBuilder, Guid, ItemBuilder};
 use std::path::Path;
 
+use crate::config::SiteConfig;
 use crate::files::write_to_file;
 use crate::posts::Post;
 
-pub fn build_rss_feed(output_dir: &Path, posts: Vec<Post>) {
+pub fn build_rss_feed(output_dir: &Path, posts: Vec<Post>, config: &SiteConfig) {
     let mut items = Vec::new();
     for post in posts {
         let item = ItemBuilder::default()
@@ -24,9 +25,9 @@ pub fn build_rss_feed(output_dir: &Path, posts: Vec<Post>) {
     }
 
     let channel = ChannelBuilder::default()
-        .title("James Poole".to_string())
-        .link("https://james.poole.ie".to_string())
-        .description("Notes and thoughts on game development and my process.".to_string())
+        .title(&config.title)
+        .link(&config.url)
+        .description(&config.description)
         .items(items)
         .build()
         .unwrap();

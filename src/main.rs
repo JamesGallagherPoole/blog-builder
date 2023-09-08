@@ -1,4 +1,5 @@
 mod category;
+mod config;
 mod files;
 mod metadata;
 mod paths;
@@ -20,6 +21,7 @@ use templates::group_by_year_as_html;
 
 use crate::{
     category::get_category_path,
+    config::SiteConfig,
     files::{copy_dir_to, read_file, remove_until_first_slash},
     metadata::MetaData,
     posts::Post,
@@ -39,10 +41,13 @@ fn main() -> Result<(), Error> {
             create_directory(path.output.as_str()).expect("Unable to create directory");
 
             if input_path.is_dir() {
+                let config = SiteConfig::read_site_config(input_path)?;
+
                 build_images_folder(input_path, output_path)?;
                 build_style_folder(input_path, output_path)?;
 
-                let (posts, categories) = build_content_folder(&input_path, "posts", output_path)?;
+                let (posts, categories) =
+                    build_content_folder(&input_path, "posts", output_path, &config)?;
 
                 build_main_page(input_path, output_path, &posts)?;
 
@@ -52,7 +57,7 @@ fn main() -> Result<(), Error> {
 
                 build_category_pages(input_path, output_path, &categories)?;
 
-                build_rss_feed(output_path, posts);
+                build_rss_feed(output_path, posts, &config);
             }
         }
         Err(e) => {
@@ -127,12 +132,12 @@ fn build_content_folder(
     input_dir: &Path,
     folder_to_build: &str,
     output_dir: &Path,
+    config: &SiteConfig,
 ) -> Result<(Vec<Post>, Vec<(Category, Vec<Post>)>), std::io::Error> {
     let mut posts: Vec<Post> = Vec::new();
     let mut categories: Vec<(Category, Vec<Post>)> = Vec::new();
 
     let path_to_build = Path::new(input_dir).join(folder_to_build);
-    let output_dir = Path::new(output_dir).join(&folder_to_build);
     if path_to_build.is_dir() {
         for entry in fs::read_dir(&path_to_build)? {
             let entry = entry?;
@@ -143,8 +148,8 @@ fn build_content_folder(
                     MetaData::read_metadata_and_contents(&file_contents);
 
                 let html = markdown::to_html(&file_contents);
-                let wrapped_html = wrap_in_header_and_footer(&input_dir, &html, 1)?;
-                let wrapped_html_with_head = add_head(&wrapped_html, true)?;
+                let wrapped_html = wrap_in_header_and_footer(&input_dir, &html, 0)?;
+                let wrapped_html_with_head = add_head(&wrapped_html, false)?;
                 let html_file_name = create_html_file_name(&path.to_str().unwrap()).unwrap();
                 fs::create_dir_all(&output_dir)?;
                 println!("Writing {} to {}", html_file_name, &output_dir.display());
@@ -156,10 +161,8 @@ fn build_content_folder(
                     html_file_name
                 );
 
-                let public_link = format!(
-                    "https://james.poole.ie/{}",
-                    remove_until_first_slash(&link_path)
-                );
+                let public_link =
+                    format!("{}/{}{}", config.url, output_dir.display(), html_file_name);
 
                 let post = Post {
                     metadata: file_metadata.clone(),
