@@ -3,6 +3,7 @@ mod files;
 mod metadata;
 mod paths;
 mod posts;
+mod rss;
 mod templates;
 
 use std::{
@@ -22,6 +23,7 @@ use crate::{
     files::{copy_dir_to, read_file, remove_until_first_slash},
     metadata::MetaData,
     posts::Post,
+    rss::build_rss_feed,
     templates::{add_head, add_recent_posts, get_index_template, wrap_in_header_and_footer},
 };
 
@@ -49,6 +51,8 @@ fn main() -> Result<(), Error> {
                 build_categories_index_page(input_path, output_path, &categories)?;
 
                 build_category_pages(input_path, output_path, &categories)?;
+
+                build_rss_feed(output_path, posts);
             }
         }
         Err(e) => {

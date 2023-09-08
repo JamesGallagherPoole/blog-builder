@@ -5,6 +5,7 @@ pub struct MetaData {
     pub title: String,
     pub date: NaiveDate,
     pub categories: Vec<String>,
+    pub summary: String,
 }
 
 impl MetaData {
@@ -19,6 +20,7 @@ impl MetaData {
             title: String::from(""),
             date: NaiveDate::from_ymd_opt(1970, 1, 1).unwrap(),
             categories: Vec::new(),
+            summary: String::from(""),
         };
 
         if let Some(yaml_hash) = yaml {
