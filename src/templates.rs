@@ -103,7 +103,7 @@ pub fn add_head(content_block: &str, look_up: bool) -> Result<String, Error> {
     }
 
     let html_with_head = format!(
-        "\n<head>\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n<link rel=\"stylesheet\" href=\"{}\">\n</head>\n{}",
+        "\n<head>\n<meta charset=\"UTF-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n<link rel=\"stylesheet\" href=\"{}\">\n</head>\n{}",
         style_path,
         content_block
     );
