@@ -155,11 +155,7 @@ fn build_content_folder(
                 println!("Writing {} to {}", html_file_name, &output_dir.display());
                 write_to_file(&output_dir, &html_file_name, &wrapped_html_with_head)?;
 
-                let link_path = format!(
-                    "./{}{}",
-                    remove_until_first_slash(&output_dir.display().to_string()),
-                    html_file_name
-                );
+                let link_path = format!("./{}", html_file_name);
 
                 let public_link =
                     format!("{}/{}{}", config.url, output_dir.display(), html_file_name);
