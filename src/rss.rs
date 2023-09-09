@@ -19,8 +19,7 @@ pub fn build_rss_feed(output_dir: &Path, posts: Vec<Post>, config: &SiteConfig) 
                 value: post.public_link.clone(),
                 ..Default::default()
             }))
-            .build()
-            .unwrap();
+            .build();
         items.push(item);
     }
 
@@ -29,8 +28,7 @@ pub fn build_rss_feed(output_dir: &Path, posts: Vec<Post>, config: &SiteConfig) 
         .link(&config.url)
         .description(&config.description)
         .items(items)
-        .build()
-        .unwrap();
+        .build();
 
     let output = channel.to_string();
 
