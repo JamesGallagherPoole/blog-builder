@@ -156,7 +156,7 @@ fn build_content_folder(
                 write_to_file(&output_dir, &html_file_name, &wrapped_html_with_head)?;
 
                 let link_path = format!(
-                    "./{}/{}",
+                    "./{}{}",
                     remove_until_first_slash(&output_dir.display().to_string()),
                     html_file_name
                 );
