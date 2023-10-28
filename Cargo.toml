@@ -2,6 +2,9 @@
 name = "blog-builder"
 version = "1.0.0"
 edition = "2021"
+readme = "README.md"
+description = "\nWell! This is a tool for generating a static blog from markdown files. Cheers for trying it out! \nIf you run using `cargo run`, make sure to put  `--` before the arguments. For example, `cargo run -- --help`"
+
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
