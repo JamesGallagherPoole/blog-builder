@@ -80,6 +80,11 @@ pub fn add_recent_posts(index_template: &str, posts: &Vec<Post>, num_posts: usiz
     index_template
 }
 
+pub fn add_title_to_body(body: &str, title: &str) -> String {
+    let body_with_title = format!("<h1>{}</h1>\n{}", title, body);
+    body_with_title
+}
+
 pub fn wrap_in_header_and_footer(
     input_path: &Path,
     content_block: &str,

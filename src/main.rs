@@ -26,7 +26,10 @@ use crate::{
     metadata::MetaData,
     posts::Post,
     rss::build_rss_feed,
-    templates::{add_head, add_recent_posts, get_index_template, wrap_in_header_and_footer},
+    templates::{
+        add_head, add_recent_posts, add_title_to_body, get_index_template,
+        wrap_in_header_and_footer,
+    },
 };
 
 fn main() -> Result<(), Error> {
@@ -147,8 +150,9 @@ fn build_content_folder(
                 let (file_metadata, file_contents) =
                     MetaData::read_metadata_and_contents(&file_contents);
 
-                let html = markdown::to_html(&file_contents);
-                let wrapped_html = wrap_in_header_and_footer(&input_dir, &html, 0)?;
+                let post_html = markdown::to_html(&file_contents);
+                let html_body = add_title_to_body(&post_html, &file_metadata.title);
+                let wrapped_html = wrap_in_header_and_footer(&input_dir, &html_body, 0)?;
                 let wrapped_html_with_head = add_head(&wrapped_html, &file_metadata.title, false)?;
                 let html_file_name = create_html_file_name(&path.to_str().unwrap()).unwrap();
                 fs::create_dir_all(&output_dir)?;
