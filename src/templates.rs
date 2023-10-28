@@ -96,14 +96,15 @@ pub fn wrap_in_header_and_footer(
     Ok(wrapped_in_container)
 }
 
-pub fn add_head(content_block: &str, look_up: bool) -> Result<String, Error> {
+pub fn add_head(content_block: &str, title: &str, look_up: bool) -> Result<String, Error> {
     let mut style_path = "style/style.css".to_string();
     if look_up {
         style_path = prepend_go_up_folder_to_path(&style_path, 1)
     }
 
     let html_with_head = format!(
-        "\n<head>\n<meta charset=\"UTF-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n<link rel=\"stylesheet\" href=\"{}\">\n</head>\n{}",
+        "\n<head>\n<title>{}</title>\n<meta charset=\"UTF-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n<link rel=\"stylesheet\" href=\"{}\">\n</head>\n{}",
+        title,
         style_path,
         content_block
     );

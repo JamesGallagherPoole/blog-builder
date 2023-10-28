@@ -49,13 +49,13 @@ fn main() -> Result<(), Error> {
                 let (posts, categories) =
                     build_content_folder(&input_path, "posts", output_path, &config)?;
 
-                build_main_page(input_path, output_path, &posts)?;
+                build_main_page(input_path, output_path, &posts, &config.title)?;
 
-                build_all_posts_page(input_path, output_path, &posts)?;
+                build_all_posts_page(input_path, output_path, &posts, &config.title)?;
 
-                build_categories_index_page(input_path, output_path, &categories)?;
+                build_categories_index_page(input_path, output_path, &categories, &config.title)?;
 
-                build_category_pages(input_path, output_path, &categories)?;
+                build_category_pages(input_path, output_path, &categories, &config.title)?;
 
                 build_rss_feed(output_path, posts, &config);
             }
@@ -149,7 +149,7 @@ fn build_content_folder(
 
                 let html = markdown::to_html(&file_contents);
                 let wrapped_html = wrap_in_header_and_footer(&input_dir, &html, 0)?;
-                let wrapped_html_with_head = add_head(&wrapped_html, false)?;
+                let wrapped_html_with_head = add_head(&wrapped_html, &file_metadata.title, false)?;
                 let html_file_name = create_html_file_name(&path.to_str().unwrap()).unwrap();
                 fs::create_dir_all(&output_dir)?;
                 println!("Writing {} to {}", html_file_name, &output_dir.display());
@@ -195,7 +195,12 @@ fn build_content_folder(
     Ok((posts, categories))
 }
 
-fn build_main_page(input_dir: &Path, output_dir: &Path, posts: &Vec<Post>) -> Result<(), Error> {
+fn build_main_page(
+    input_dir: &Path,
+    output_dir: &Path,
+    posts: &Vec<Post>,
+    site_title: &str,
+) -> Result<(), Error> {
     if input_dir.is_dir() {
         // find a path within this directory called index.md
         for entry in fs::read_dir(input_dir)? {
@@ -207,7 +212,7 @@ fn build_main_page(input_dir: &Path, output_dir: &Path, posts: &Vec<Post>) -> Re
                     let index_template = get_index_template(input_dir)?;
                     let index_content = add_recent_posts(&index_template, &posts, 5);
                     let wrapped_index = wrap_in_header_and_footer(&input_dir, &index_content, 0)?;
-                    let wrapped_index_with_head = add_head(&wrapped_index, false)?;
+                    let wrapped_index_with_head = add_head(&wrapped_index, site_title, false)?;
                     write_to_file(output_dir, "index.html", &wrapped_index_with_head)?;
                 }
             }
@@ -220,11 +225,12 @@ fn build_all_posts_page(
     input_dir: &Path,
     output_dir: &Path,
     posts: &Vec<Post>,
+    site_title: &str,
 ) -> Result<(), Error> {
     if input_dir.is_dir() {
         let content = group_by_year_as_html(&posts);
         let wrapped_index = wrap_in_header_and_footer(&input_dir, &content, 0)?;
-        let wrapped_index_with_head = add_head(&wrapped_index, false)?;
+        let wrapped_index_with_head = add_head(&wrapped_index, site_title, false)?;
         write_to_file(output_dir, "all.html", &wrapped_index_with_head)?;
     }
     Ok(())
@@ -234,6 +240,7 @@ fn build_categories_index_page(
     input_dir: &Path,
     output_dir: &Path,
     categories: &Vec<(Category, Vec<Post>)>,
+    site_title: &str,
 ) -> Result<(), Error> {
     if input_dir.is_dir() {
         let mut content = String::from("<h2>Categories</h2>\n<ul>\n");
@@ -243,7 +250,7 @@ fn build_categories_index_page(
             content.push_str(&category_list);
         }
         let wrapped_index = wrap_in_header_and_footer(&input_dir, &content, 0)?;
-        let wrapped_index_with_head = add_head(&wrapped_index, false)?;
+        let wrapped_index_with_head = add_head(&wrapped_index, site_title, false)?;
         write_to_file(output_dir, "categories.html", &wrapped_index_with_head)?;
     }
     Ok(())
@@ -253,12 +260,13 @@ fn build_category_pages(
     input_dir: &Path,
     output_dir: &Path,
     categories: &Vec<(Category, Vec<Post>)>,
+    site_title: &str,
 ) -> Result<(), Error> {
     if input_dir.is_dir() {
         for (category, posts) in categories {
             let content = &create_category_list_html(category, posts);
             let wrapped_index = wrap_in_header_and_footer(&input_dir, &content, 0)?;
-            let wrapped_index_with_head = add_head(&wrapped_index, false)?;
+            let wrapped_index_with_head = add_head(&wrapped_index, site_title, false)?;
             write_to_file(output_dir, &category.path, &wrapped_index_with_head)?;
         }
     }
