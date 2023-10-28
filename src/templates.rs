@@ -121,7 +121,7 @@ pub fn group_by_year_as_html(posts: &Vec<Post>) -> String {
     for post in posts {
         let year = post.metadata.date.year();
         let mut found = false;
-        for (i, sorted_post) in sorted_posts.iter_mut().enumerate() {
+        for (_i, sorted_post) in sorted_posts.iter_mut().enumerate() {
             if sorted_post.0 == year {
                 sorted_post.1.push(post.clone());
                 found = true;

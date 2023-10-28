@@ -22,7 +22,7 @@ use templates::group_by_year_as_html;
 use crate::{
     category::get_category_path,
     config::SiteConfig,
-    files::{copy_dir_to, read_file, remove_until_first_slash},
+    files::{copy_dir_to, read_file},
     metadata::MetaData,
     posts::Post,
     rss::build_rss_feed,

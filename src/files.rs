@@ -43,22 +43,3 @@ pub fn prepend_go_up_folder_to_path(path: &str, num: i8) -> String {
     new_path.push_str(path);
     new_path
 }
-
-pub fn get_date_from_path(path: &str) -> Option<String> {
-    let path = Path::new(path);
-    let file_stem = path.file_stem()?;
-    let file_stem = file_stem.to_string_lossy();
-    let date = file_stem.split('-').collect::<Vec<&str>>();
-    let date = date[0..3].join("-");
-    Some(date)
-}
-
-pub fn remove_until_first_slash(path: &str) -> &str {
-    // Find the first occurrence of the '/' character
-    match path.find('/') {
-        // If found, return the substring after the '/'
-        Some(pos) => &path[pos + 1..],
-        // If not found, return the original string
-        None => path,
-    }
-}
