@@ -21,7 +21,11 @@ pub fn create_category_list_html(category: &Category, posts: &Vec<Post>) -> Stri
     category_list_html.push_str(&category.name);
     category_list_html.push_str("</h2>\n<ul>\n");
 
-    for post in posts {
+    // Sort posts so that the most recent is first
+    let mut sorted_posts = posts.clone();
+    sorted_posts.sort_by(|a, b| b.metadata.date.cmp(&a.metadata.date));
+
+    for post in sorted_posts {
         let post_html = format!(
             "<li><a href=\"{}\">{}</a></li>\n",
             post.path, post.metadata.title
