@@ -1,3 +1,4 @@
+mod argparse;
 mod category;
 mod config;
 mod files;
@@ -8,13 +9,14 @@ mod rss;
 mod templates;
 
 use std::{
-    env,
     fs::{self},
     io::Error,
     path::Path,
 };
 
+use argparse::Cli;
 use category::{create_category_list_html, Category};
+use clap::Parser;
 use files::{create_html_file_name, write_to_file};
 use paths::Paths;
 use templates::group_by_year_as_html;
@@ -61,6 +63,8 @@ fn main() -> Result<(), Error> {
                 build_category_pages(input_path, output_path, &categories, &config.title)?;
 
                 build_rss_feed(output_path, posts, &config);
+
+                println!("Done!");
             }
         }
         Err(e) => {
@@ -71,20 +75,13 @@ fn main() -> Result<(), Error> {
 }
 
 fn read_args() -> Result<Paths, Error> {
-    let args: Vec<String> = env::args().collect();
+    let args = Cli::parse();
 
-    if args.len() > 3 || args.len() <= 1 {
-        Err(Error::new(
-            std::io::ErrorKind::InvalidInput,
-            "Provide a single path argument",
-        ))
-    } else {
-        let paths = Paths {
-            input: args[1].clone(),
-            output: args[2].clone(),
-        };
-        Ok(paths)
-    }
+    let paths = Paths {
+        input: args.input_dir.to_str().unwrap().to_string(),
+        output: args.output_dir.to_str().unwrap().to_string(),
+    };
+    Ok(paths)
 }
 
 fn create_directory(path: &str) -> Result<(), Error> {
