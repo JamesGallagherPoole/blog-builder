@@ -1,0 +1,128 @@
+/*
+This is an example CSS stylesheet that is loosely based around the one that I use for my site.
+
+It can be a starting point for your own site.
+*/
+
+:root {
+  --main-bg-color: #2b2b2b;
+  --light-bg-color: #f4f4f4;
+  --normal-text-color: #e8e4d0;
+  --dark-text-color: #666;
+  --heading-color: #e8badd;
+  --highlight-color: #F0803C;
+}
+
+body {
+  background-color: var(--main-bg-color);
+  font-family: serif;
+}
+
+p {
+  line-height: 1.6em;
+  color: var(--normal-text-color);
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+
+@media only screen and (min-width: 600px) {
+  .small {
+    max-width: 60%;
+    height: auto;
+  }
+}
+
+.caption {
+  margin-top: 0;
+  font-size: 0.9em;
+  font-style: italic;
+}
+
+a {
+  color: var(--highlight-color);
+  text-decoration: none;
+  font-family: "serif";
+}
+
+a:hover {
+  color: var(--normal-text-color);
+  text-decoration: underline;
+}
+
+li {
+  color: var(--normal-text-color);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5 {
+  font-family: sans-serif;
+  color: var(--heading-color);
+}
+
+/*#CONTAINER is the rectangle that contains everything but the background!*/
+#container {
+  margin: 3em auto;
+  width: 90%;
+  max-width: 700px;
+  color: #151515;
+}
+
+/*HEADER STYLE*/
+header {
+  background-color: var(--main-bg-color);
+}
+
+header ul {
+  list-style-type: none;
+  padding: 0.5em 0;
+  margin: 0;
+}
+
+header li {
+  display: inline-block;
+  margin-right: 1.5em;
+  margin-bottom: 0.2em;
+  margin-top: 0.2em;
+}
+
+header li a {
+  font-family: "serif";
+  color: var(--highlight-color);
+  text-decoration: none;
+  background-color: inherit;
+}
+
+header li a:hover {
+  color: var(--normal-text-color);
+}
+
+/*FOOTER STYLE*/
+footer {
+  font-size: 0.8em;
+}
+
+/*CODE BLOCK STYLE */
+pre {
+  background: var(--light-bg-color);
+  border: 1px solid #ddd;
+  border-left: 3px solid var(--highlight-color);
+  color: var(--dark-text-color);
+  page-break-inside: avoid;
+  font-family: monospace;
+  font-size: 15px;
+  line-height: 1.6;
+  margin-bottom: 1.6em;
+  max-width: 100%;
+  padding: 1em 1.5em;
+  display: block;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+}
