@@ -17,7 +17,7 @@ pub fn create_recent_posts_html(posts: &Vec<Post>, num_posts: usize) -> String {
     for post in sorted_posts.iter().take(num_posts) {
         recent_posts_html.push_str(&format!(
             "<li><a href=\"{}\">{}</a></li>\n",
-            post.public_link, post.metadata.title
+            post.path, post.metadata.title
         ));
     }
 
