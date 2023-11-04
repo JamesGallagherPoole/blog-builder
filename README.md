@@ -57,7 +57,7 @@ A neat side effect of this tool and working with standards like markdown and fro
 
 An example that I stumbled across is using [Obsidian](https://obsidian.md/) to write my blog posts. I have set up an Obsidian Vault in my `input` folder. I can write my blog posts in Obsidian, easily add images and have them automatically added to the `images/` folder. The post metadata is also nicely presented as Properties at the top of the page! Then I can run this tool to convert the latest work and its ready to go!
 
-![Obsidian Example](example_template/images/obsidian-example.png)
+![Obsidian Example](./example_template/images/obsidian-example.png)
 
 ### Future Plans
 - Auto compress and dither images.
