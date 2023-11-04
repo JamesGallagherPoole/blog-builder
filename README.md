@@ -1,8 +1,10 @@
 ## Blog Builder 🖳
 
-This is a simple static site generator for my blog. It's written in Rust.
+This is a simple static site generator for my blog, written in Rust.
 The tool is accessible for everyone to use but it's been designed quite specifically for my needs and workflow.
 Do get in touch if you happen to try it out!
+
+I have used it to build my blog which you can find [here](https://james.poole.ie/notes).
 
 ### Project Goals 🥅
 - To be able write content for my blog in markdown.
@@ -15,21 +17,40 @@ Do get in touch if you happen to try it out!
 - To create a system for building my website from the bottom up that I understand.
 - To create something that perfectly fits my needs.
 - For the fun of it.
+- To try out Rust for creating a simple CLI tool.
 
-### Pre-requisites
-- Install [Rust](https://www.rust-lang.org/tools/install).
+### Platforms 🐧
+- This tool has been built and tested only on Linux.
 
-### Setup
+### Pre-requisites 🦀
+- Install [Rust](https://www.rust-lang.org/tools/install). I use the `rustup` method that is described.
+
+### Setup 🏗️
+
+*method 1*
 - Clone the repo.
 - Run `cargo run -- --input example_template --output example_site` to generate the example site.
+- A site will be generated in the `example_site` folder. If you open the `index.html` file in your browser, you should see the example site.
+- When you run `cargo run`, a binary will be generated in the `target/debug` folder. You can optionally copy this out to somewhere else if you like for easier access. Instead of running `cargo run --` in the future, you can run the binary directly.
+
+*method 2*
+
+**Note:** This method does not include the example template. It is just the application binary. I recommend cloning the project to get the example template as a starting point.
+- Download the binary from the releases.
+- I place the binary in the same folder as my `input` and `output` folders for convenience.
+- Make the binary executable with `chmod +x blog-builder`.
+- Run `./blog-builder --input <input-folder> --output <output-folder>` to generate the example site.
 
 ### Usage 📖
+
+**Note:** If you have downloaded the binary, replace `cargo run --` with `./blog-builder` in the following instructions.
+
 - Run `cargo run -- --input <input> --output <output>` to generate your site.
 - The `input` folder should follow the format of the `example_template` folder.
   - You can customise the contents of the templates how you would like!
 - The `output` folder will be created if it doesn't exist.
+- Running `cargo run -- --help` will show you the available options.
 
 ### Future Plans
 - Auto compress and dither images.
 - Show a preview of each post whenever they are shown, instead of just the title.
-
