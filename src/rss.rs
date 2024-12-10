@@ -14,6 +14,7 @@ pub fn build_rss_feed(output_dir: &Path, posts: Vec<Post>, config: &SiteConfig) 
             .title(Some(post.metadata.title.clone()))
             .link(Some(post.public_link.clone()))
             .description(Some(post.metadata.summary.clone()))
+            .content(Some(post.content))
             .pub_date(Some(post.metadata.rss_formatted_date()))
             .guid(Some(Guid {
                 value: post.public_link.clone(),
