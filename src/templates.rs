@@ -1,6 +1,6 @@
 use std::{io::Error, path::Path};
 
-use chrono::Datelike;
+use chrono::{Datelike, NaiveDate};
 
 use crate::{
     files::{prepend_go_up_folder_to_path, read_file},
@@ -80,6 +80,11 @@ pub fn add_recent_posts(index_template: &str, posts: &Vec<Post>, num_posts: usiz
     index_template
 }
 
+pub fn add_date_to_body(body: &str, date: &NaiveDate) -> String {
+    let body_with_date = format!("<h3>{}</h3>\n{}", date, body);
+    body_with_date
+}
+
 pub fn add_title_to_body(body: &str, title: &str) -> String {
     let body_with_title = format!("<h1>{}</h1>\n{}", title, body);
     body_with_title
@@ -145,8 +150,8 @@ pub fn group_by_year_as_html(posts: &Vec<Post>) -> String {
         for post in posts {
             year_html.push_str(
                 format!(
-                    "<li><a href=\"{}\">{}</a></li>\n",
-                    post.path, post.metadata.title
+                    "<li><a href=\"{}\">{} - [{}]</a></li>\n",
+                    post.path, post.metadata.title, post.metadata.date
                 )
                 .as_str(),
             );

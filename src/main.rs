@@ -19,7 +19,7 @@ use category::{create_category_list_html, Category};
 use clap::Parser;
 use files::{create_html_file_name, write_to_file};
 use paths::Paths;
-use templates::group_by_year_as_html;
+use templates::{add_date_to_body, group_by_year_as_html};
 
 use crate::{
     category::get_category_path,
@@ -147,7 +147,8 @@ fn build_content_folder(
                 let (file_metadata, file_contents) =
                     MetaData::read_metadata_and_contents(&file_contents);
 
-                let post_html = markdown::to_html(&file_contents);
+                let mut post_html = markdown::to_html(&file_contents);
+                post_html = add_date_to_body(&post_html, &file_metadata.date);
                 let html_body = add_title_to_body(&post_html, &file_metadata.title);
                 let wrapped_html = wrap_in_header_and_footer(&input_dir, &html_body, 0)?;
                 let wrapped_html_with_head = add_head(&wrapped_html, &file_metadata.title, false)?;
