@@ -16,8 +16,8 @@ pub fn create_recent_posts_html(posts: &Vec<Post>, num_posts: usize) -> String {
     sorted_posts.sort_by(|a, b| b.metadata.date.cmp(&a.metadata.date));
     for post in sorted_posts.iter().take(num_posts) {
         recent_posts_html.push_str(&format!(
-            "<li><a href=\"{}\">{}</a></li>\n",
-            post.path, post.metadata.title
+            "<li><a href=\"{}\">{} - [{}]</a></li>\n",
+            post.path, post.metadata.title, post.metadata.date
         ));
     }
 
