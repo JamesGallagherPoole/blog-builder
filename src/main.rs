@@ -211,7 +211,7 @@ fn build_main_page(
                 if path.is_file() {
                     println!("Found main template. Building and copying to destination...");
                     let index_template = get_index_template(input_dir)?;
-                    let index_content = add_recent_posts(&index_template, &posts, 5);
+                    let index_content = add_recent_posts(&index_template, &posts, 10);
                     let wrapped_index = wrap_in_header_and_footer(&input_dir, &index_content, 0)?;
                     let wrapped_index_with_head = add_head(&wrapped_index, site_title, false)?;
                     write_to_file(output_dir, "index.html", &wrapped_index_with_head)?;
