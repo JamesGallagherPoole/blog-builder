@@ -28,7 +28,9 @@ pub fn create_category_list_html(category: &Category, posts: &Vec<Post>) -> Stri
     for post in sorted_posts {
         let post_html = format!(
             "<li><a href=\"{}\">{} - [{}]</a></li>\n",
-            post.path, post.metadata.title, post.metadata.date
+            post.path,
+            post.metadata.title,
+            post.metadata.date.format("%-d %B %Y").to_string()
         );
         category_list_html.push_str(&post_html);
     }

@@ -67,6 +67,12 @@ h5 {
   color: var(--heading-color);
 }
 
+#date {
+  font-family: serif;
+  font-style: italic;
+  color: var(--normal-text-color);
+}
+
 /*#CONTAINER is the rectangle that contains everything but the background!*/
 #container {
   margin: 3em auto;

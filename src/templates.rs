@@ -81,7 +81,7 @@ pub fn add_recent_posts(index_template: &str, posts: &Vec<Post>, num_posts: usiz
 }
 
 pub fn add_date_to_body(body: &str, date: &NaiveDate) -> String {
-    let body_with_date = format!("<h3>{}</h3>\n{}", date, body);
+    let body_with_date = format!("<h4 id=\"date\">{}</h4>\n{}", date, body);
     body_with_date
 }
 
@@ -151,7 +151,9 @@ pub fn group_by_year_as_html(posts: &Vec<Post>) -> String {
             year_html.push_str(
                 format!(
                     "<li><a href=\"{}\">{} - [{}]</a></li>\n",
-                    post.path, post.metadata.title, post.metadata.date
+                    post.path,
+                    post.metadata.title,
+                    post.metadata.date.format("%-d %B %Y").to_string()
                 )
                 .as_str(),
             );
